@@ -204,3 +204,21 @@ class AuthApiTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['profile']['nickname'], 'CsrfKnight')
+   
+    def test_unsafe_request_without_csrf_token_is_rejected(self):
+        user = User.objects.create_user(
+            username='player_six',
+            email='player6@example.com',
+            password='example-password',
+        )
+
+        self.client = self.client_class(enforce_csrf_checks=True)
+        self.client.force_login(user)
+
+        response = self.client.patch(
+            reverse('auth-me'),
+            {'nickname': 'NoCsrfKnight'},
+            content_type='application/json',
+        )
+
+        self.assertEqual(response.status_code, 403)
