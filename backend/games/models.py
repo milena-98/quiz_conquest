@@ -34,6 +34,17 @@ class Game(models.Model):
 
 
 class GamePlayer(models.Model):
+    RED = 'red'
+    BLUE = 'blue'
+    GREEN = 'green'
+    YELLOW = 'yellow'
+    COLOR_CHOICES = [
+        (RED, 'Red'),
+        (BLUE, 'Blue'),
+        (GREEN, 'Green'),
+        (YELLOW, 'Yellow'),
+    ]
+
     game = models.ForeignKey(Game, on_delete=models.CASCADE, related_name='players')
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -41,6 +52,7 @@ class GamePlayer(models.Model):
         related_name='game_players',
     )
     player_order = models.PositiveSmallIntegerField()
+    color = models.CharField(max_length=16, choices=COLOR_CHOICES, default=RED)
     score = models.IntegerField(default=0)
     is_active = models.BooleanField(default=True)
     joined_at = models.DateTimeField(auto_now_add=True)
@@ -176,3 +188,18 @@ class RoundAnswer(models.Model):
 
     def __str__(self):
         return f'{self.player} answer for Round {self.round.number}'
+
+
+class WaitingRoomEntry(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='waiting_room_entry',
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['created_at', 'pk']
+
+    def __str__(self):
+        return f'{self.user} in the waiting room'
